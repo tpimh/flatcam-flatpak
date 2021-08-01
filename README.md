@@ -10,6 +10,7 @@ The most valuable parts are borrowed from other Flatpaks published in Flathub:
 
 - pyqt5 from [org.qutebrowser.qutebrowser](https://github.com/flathub/org.qutebrowser.qutebrowser/blob/2ba9696140894061f6e46f7fb4a9addd8a9151b7/org.qutebrowser.qutebrowser.yml#L201)
 - gdal from [org.qgis.qgis](https://github.com/flathub/org.qgis.qgis/blob/05c19fa122feddb3753daf5dd7d898c7d3fae9e6/org.qgis.qgis.json#L194)
+- tkinter from [org.unknown_horizons.UnknownHorizons](https://github.com/flathub/org.unknown_horizons.UnknownHorizons/blob/9378c14eac851d408907a1c0c494471bf59ea756/org.unknown_horizons.UnknownHorizons.json#L110)
 
 ## Building and running
 
