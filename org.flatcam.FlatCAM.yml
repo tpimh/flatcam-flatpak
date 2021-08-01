@@ -1,0 +1,1017 @@
+app-id: org.flatcam.FlatCAM
+runtime: org.kde.Platform
+runtime-version: '5.15'
+sdk: org.kde.Sdk
+command: /app/flatcam-beta
+finish-args:
+  - --env=LD_PRELOAD=/app/lib/libgdal.so
+  - --socket=wayland
+modules:
+  - name: pyqt5
+    config-opts:
+      - --assume-shared
+      - --concatenate
+      - --confirm-license
+      - --enable=QtCore
+      - --enable=QtDBus
+      - --enable=QtGui
+      - --enable=QtNetwork
+      - --enable=QtOpenGL
+      - --enable=QtPrintSupport
+      - --enable=QtQml
+      - --enable=QtQuick
+      - --enable=QtSql
+      - --enable=QtTest
+      - --enable=QtWebChannel
+      - --enable=QtWidgets
+      - --no-designer-plugin
+      - --no-dist-info
+      - --no-docstrings
+      - --no-qml-plugin
+      - --no-qsci-api
+      - --no-stubs
+      - --no-tools
+      - QMAKE_CFLAGS_RELEASE='-I/usr/include/python3.8/'
+      - QMAKE_CXXFLAGS_RELEASE='-I/usr/include/python3.8/'
+    build-options:
+      arch:
+        aarch64:
+          config-opts:
+            - --disable-feature=PyQt_Desktop_OpenGL
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/8e/a4/d5e4bf99dd50134c88b95e926d7b81aad2473b47fde5e3e4eac2c69a8942/PyQt5-5.15.4.tar.gz
+        sha256: 2a69597e0dd11caabe75fae133feca66387819fc9bc050f547e5551bce97e5be
+        x-checker-data:
+          type: pypi
+          name: PyQt5
+      - type: script
+        commands:
+          - processed=`sed -e 's|prefix|sysroot|' <<< $@`
+          - python3 configure.py $processed
+        dest-filename: configure
+    cleanup:
+      - /share/sip
+    modules:
+      - name: sip
+        config-opts:
+          - --no-dist-info
+          - --no-stubs
+          - --bindir=/app/bin
+          - --destdir=/app/lib/python3.8/site-packages
+          - --incdir=/app/include
+          - --pyidir=/app/lib/python3.8/site-packages
+          - --sipdir=/app/share/sip
+          - --sip-module PyQt5.sip
+        sources:
+          - type: archive
+            url: https://www.riverbankcomputing.com/static/Downloads/sip/4.19.25/sip-4.19.25.tar.gz
+            sha256: b39d93e937647807bac23579edbff25fe46d16213f708370072574ab1f1b4211
+            # TODO: switch to sip6 and enable this
+            #x-checker-data:
+            #  type: pypi
+            #  name: sip
+          - type: script
+            commands:
+              - processed=`sed -e 's|--prefix=/app||' <<< $@`
+              - python3 configure.py $processed
+            dest-filename: configure
+        cleanup:
+          - /bin
+
+  - name: simplejson
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} simplejson
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/e3/24/c35fb1c1c315fc0fffe61ea00d3f88e85469004713dab488dee4f35b0aff/simplejson-3.16.0.tar.gz
+        sha256: b1f329139ba647a9548aa05fb95d046b4a677643070dc2afc05fa2e975d09ca5
+
+  - name: geos
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://github.com/libgeos/geos/archive/refs/tags/3.8.2.tar.gz
+        sha256: 70a3d166e07f5c483f5328020a5b18addb34837fc35509a4f8d85eb05b631d3b
+
+  - name: shapely
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} Shapely
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/42/f3/0e1bc2c4f15e05e30c6b99322b9ddaa2babb3f43bc7df2698efdc1553439/Shapely-1.7.1.tar.gz
+        sha256: 1641724c1055459a7e2b8bbe47ba25bdc89554582e62aec23cb3f3ca25f9b129
+
+  - name: reportlab
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/0f/0b/bce8f4a6641c30889fd82b50665f0f7521d633bfd3360af2c11b8b2200af/reportlab-3.5.34.tar.gz
+        sha256: 9675a26d01ec141cb717091bb139b6227bfb3794f521943101da50327bff4825
+      - type: file
+        url: https://files.pythonhosted.org/packages/39/47/f28067b187dd664d205f75b07dcc6e0e95703e134008a14814827eebcaab/Pillow-7.0.0.tar.gz
+        sha256: 4d9ed9a64095e031435af120d3c910148067087541131e82b3e8db302f4c8946
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} reportlab
+
+  - name: lxml
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/39/2b/0a66d5436f237aff76b91e68b4d8c041d145ad0a2cdeefe2c42f76ba2857/lxml-4.5.0.tar.gz
+        sha256: 8620ce80f50d023d414183bf90cc2576c2837b88e00bea3f33ad2630133bbb60
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} lxml
+
+  - name: svglib
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/c0/2c/5ab28095c9ce09a6d341cb37c0ad3a7ffc65e5c5f2eaa2247c085679ca2f/svglib-1.1.0.tar.gz
+        sha256: 520ee5290ee2ebeebd20ca0d7d995c08c903b364fcf515826bab43a1288d422e
+      - type: file
+        url: https://files.pythonhosted.org/packages/ce/d3/ece7a98d5826bd134e269a3a3030153d30482194fca71d95a3041812aab8/tinycss2-1.1.0.tar.gz
+        sha256: fbdcac3044d60eb85fdb2aa840ece43cf7dbe798e373e6ee0be545d4d134e18a
+      - type: file
+        url: https://files.pythonhosted.org/packages/76/72/19162eb5c1a34ad073f708d50dbd6b6f83bc4275c32dce348f135546daf9/flit-3.2.0.tar.gz
+        sha256: 592464c9268bbacec9bc67b5a3ae62e6e090aeec1563e69501df338a1728e551
+      - type: file
+        url: https://files.pythonhosted.org/packages/a7/06/700a2ae25c67bf3722c9b01788f43808ebc94b6a544b5008770e19406f6a/flit_core-3.2.0.tar.gz
+        sha256: ff87f25c5dbc24ef30ea334074e35030e4885e4c5de3bf4e21f15746f6d99431
+      - type: file
+        url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+        sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+      - type: file
+        url: https://files.pythonhosted.org/packages/4c/17/559b4d020f4b46e0287a2eddf2d8ebf76318fd3bd495f1625414b052fdc9/docutils-0.17.1.tar.gz
+        sha256: 686577d2e4c32380bb50cbb22f575ed742d58168cee37e99117a854bcd88f125
+      - type: file
+        url: https://files.pythonhosted.org/packages/e7/01/3569e0b535fb2e4a6c384bdbed00c55b9d78b5084e0fb7f4d0bf523d7670/requests-2.26.0.tar.gz
+        sha256: b8aa58f8cf793ffd8782d3d8cb19e66ef36f7aba4353eec859e74678b01b07a7
+      - type: file
+        url: https://files.pythonhosted.org/packages/4f/5a/597ef5911cb8919efe4d86206aa8b2658616d676a7088f0825ca08bd7cb8/urllib3-1.26.6.tar.gz
+        sha256: f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f
+      - type: file
+        url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
+        sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
+      - type: file
+        url: https://files.pythonhosted.org/packages/37/fd/05a04d7e14548474d30d90ad0db5d90ee2ba55cd967511a354cf88b534f1/charset-normalizer-2.0.3.tar.gz
+        sha256: c46c3ace2d744cfbdebceaa3c19ae691f53ae621b39fd7570f59d14fb7f2fd12
+      - type: file
+        url: https://files.pythonhosted.org/packages/cb/38/4c4d00ddfa48abe616d7e572e02a04273603db446975ab46bbcd36552005/idna-3.2.tar.gz
+        sha256: 467fbad99067910785144ce333826c71fb0e63a425657295239737f7ecd125f3
+      - type: file
+        url: https://files.pythonhosted.org/packages/0b/02/ae6ceac1baeda530866a85075641cec12989bd8d31af6d5ab4a3e8c92f47/webencodings-0.5.1.tar.gz
+        sha256: b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923
+      - type: file
+        url: https://files.pythonhosted.org/packages/ad/3d/fb764303deb34cbc1a32fcecdfd239367cb16323920c88390b2f5ad751f0/cssselect2-0.4.1.tar.gz
+        sha256: 93fbb9af860e95dd40bf18c3b2b6ed99189a07c0f29ba76f9c5be71344664ec8
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} svglib
+
+  - name: cmake
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/a2/48/864717c46541a332a1357852202a9e8da86be01beea90500baeae2de6594/cmake-3.21.1.tar.gz
+        sha256: 748ca91196e07607188ecf9b0884e111cfc49535d28c08fb37ad7600a65310e2
+      - type: file
+        dest: tarballs
+        url: https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1.tar.gz
+        sha256: fac3915171d4dff25913975d712f76e69aef44bf738ba7b976793a458b4cfed4
+      - type: file
+        dest: tarballs
+        url: https://dist.libuv.org/dist/v1.23.0/libuv-v1.23.0.tar.gz
+        sha256: d1746d324dea973d9f4c7ff40ba9cf60556c0bae9a92ad970568211b0e3bce27
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/5a/1e/aff89bf606c8939568b3f5fc388699af37e8e91c35ec10840d8224ebdca0/codecov-2.1.11.tar.gz
+        sha256: 6cde272454009d27355f9434f4e49f238c0273b216beda8472a65dc4957f473b
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/38/df/d5e67851e83948def768d7fb1a0fd373665b20f56ff63ed220c6cd16cb11/coverage-5.5.tar.gz
+        sha256: ebe78fe9a0e874362175b02371bdfbee64d8edc42a044253ddf4ee7d3c15212c
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/9e/47/15b267dfe7e03dca4c4c06e7eadbd55ef4dfd368b13a0bab36d708b14366/flake8-3.9.2.tar.gz
+        sha256: 07528381786f2a6237b061f6e96610a4167b226cb926e2aa2b6b1d78057c576b
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/b6/e3/81be70016d58ade0f516191fa80152daba5453d0b07ce648d9daae86a188/path.py-12.5.0.tar.gz
+        sha256: 8d885e8b2497aed005703d94e0fd97943401f035e42a136810308bff034529a8
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/db/e2/c0ced9ccffb61432305665c22842ea120c0f649eec47ecf2a45c596707c4/setuptools-57.4.0.tar.gz
+        sha256: 6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/ed/46/e298a50dde405e1c202e316fa6a3015ff9288423661d7ea5e8f22f589071/wheel-0.36.2.tar.gz
+        sha256: e11eefd162658ea59a60a0f6c7d493a7190ea4b9a85e335b33489d9f17e0245e
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/5b/98/92bbda5f83ed995ef8953349ef30c77c934abcc251c42ab3d7787a40c49c/pytest-6.2.4.tar.gz
+        sha256: 50bcad0a0b9c5a72c8e4e7c9855a3ad496ca6a881a3641b4260605450772c54b
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+        sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/63/3a/747e953051fd6eb5fb297907a825aad43d94c556d3b9938fc21f3172879f/pytest-cov-2.12.1.tar.gz
+        sha256: 261ceeb8c227b726249b376b8526b600f38667ee314f910353fa318caa01f4d7
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/2a/04/c3223812b3427ffa95110c5781eae7fe8bc3e9e1fe4e2328bee17b9e5820/pytest-runner-5.3.1.tar.gz
+        sha256: 0fce5b8dc68760f353979d99fdd6b3ad46330b6b1837e2077a89ebcf204aac91
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/96/73/f3d34462e1d2de89bab407ba3dac5212e9e6996f5b4bc3c6930c68f51b62/pytest-virtualenv-1.7.0.tar.gz
+        sha256: 2270ee8822111ec25db48e9d9f2efec32e68483a015b14cd0d92aeccc6ff820f
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/d9/c5/396c2c06cc89d4ce2d8ccf1d7e6cf31b33d4466a7c65a67a992adb3c6f29/setuptools-git-1.2.tar.gz
+        sha256: ff64136da01aabba76ae88b050e7197918d8b2139ccbf6144e14d472b9c40445
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/71/02/1e94506b7bee5739317f2d141cebab7dab5bb5731b377e718fddd3b3e7e7/scikit-build-0.11.1.tar.gz
+        sha256: da40dfd69b2456fad1349a894b90180b43712152b8a85d2a00f4ae2ce8ac9a5c
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/d4/f9/e65670c81f7b6a4131fdb0ee42f2d5d4be42e89e6ffd04d4a43bd1c4ff8e/virtualenv-20.6.0.tar.gz
+        sha256: 51df5d8a2fad5d1b13e088ff38a433475768ff61f202356bb9812c454c20ae45
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/e7/01/3569e0b535fb2e4a6c384bdbed00c55b9d78b5084e0fb7f4d0bf523d7670/requests-2.26.0.tar.gz
+        sha256: b8aa58f8cf793ffd8782d3d8cb19e66ef36f7aba4353eec859e74678b01b07a7
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/a8/0f/0dc480da9162749bf629dca76570972dd9cce5bedc60196a3c912875c87d/pyflakes-2.3.1.tar.gz
+        sha256: f5bc8ecabc05bb9d291eb5203d6810b49040f6ff446a756326104746cc00c1db
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/02/b3/c832123f2699892c715fcdfebb1a8fdeffa11bb7b2350e46ecdd76b45a20/pycodestyle-2.7.0.tar.gz
+        sha256: c389c1d06bf7904078ca03399a4816f974a1d590090fecea0c63ec26ebaf1cef
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/06/18/fa675aa501e11d6d6ca0ae73a101b2f3571a565e0f7d38e062eec18a91ee/mccabe-0.6.1.tar.gz
+        sha256: dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/62/2d/652177467df19e8602cad09c080098dd2e16c5fdc1f2c8f366dc38c38790/path-16.2.0.tar.gz
+        sha256: 2de925e8d421f93bcea80d511b81accfb6a7e6b249afa4a5559557b0cf817097
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/f8/04/7a8542bed4b16a65c2714bf76cf5a0b026157da7f75e87cc88774aa10b14/pluggy-0.13.1.tar.gz
+        sha256: 15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/df/86/aef78bab3afd461faecf9955a6501c4999933a48394e90f03cd512aad844/packaging-21.0.tar.gz
+        sha256: 7dc96269f53a4ccec5c0670940a4281106dd0bb343f47b7471f779df49c2fbe7
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/0d/8c/50e9f3999419bb7d9639c37e83fa9cdcf0f601a9d407162d6c37ad60be71/py-1.10.0.tar.gz
+        sha256: 21b81bda15b66ef5e1a777a21c4dcd9c20ad3efd0b3f817e7a809035269e1bd3
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/ed/d6/3ebca4ca65157c12bd08a63e20ac0bdc21ac7f3694040711f9fd073c0ffb/attrs-21.2.0.tar.gz
+        sha256: ef6aaac3ca6cd92904cdd0d83f629a15f18053ec84e6432106f7a4d04ae4f5fb
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/23/a2/97899f6bd0e873fed3a7e67ae8d3a08b21799430fb4da15cfedf10d6e2c2/iniconfig-1.1.1.tar.gz
+        sha256: bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/07/19/37fe282f262b65247e310ec59223329e1ad53a71683f81a139e7d9ca7916/pytest-fixture-config-1.7.0.tar.gz
+        sha256: 41a17417721f6862ce6b40e3280fddd8e1659b2c306ec46b237d7021fec5218e
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/f7/fa/c1f7bfb61674f69fb2694bda0ef475a6b8b915a5c36105648dd58a6f200a/pytest-shutil-1.7.0.tar.gz
+        sha256: d8165261de76e7508505c341d94c02b113dc963f274543abca74dbfabd021261
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/a6/a4/75064c334d8ae433445a20816b788700db1651f21bdb0af33db2aab142fe/distro-1.5.0.tar.gz
+        sha256: 0e58756ae38fbd8fc3020d54badb8eae17c5b9dcbed388b17bb55b8a5928df92
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/e4/7e/249120b1ba54c70cf988a8eb8069af1a31fd29d42e3e05b9236a34533533/backports.entry_points_selectable-1.1.0.tar.gz
+        sha256: 988468260ec1c196dab6ae1149260e2f5472c9110334e5d51adcb77867361f6a
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/58/cb/ee4234464290e3dee893cf37d1adc87c24ade86ff6fc55f04a9bf9f1ec4f/platformdirs-2.2.0.tar.gz
+        sha256: 632daad3ab546bd8e6af0537d09805cec458dce201bccfe23012df73332e181e
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/14/ec/6ee2168387ce0154632f856d5cc5592328e9cf93127c5c9aeca92c8c16cb/filelock-3.0.12.tar.gz
+        sha256: 18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/45/97/15fdbef466e12c890553cebb1d8b1995375202e30e0c83a1e51061556143/distlib-0.3.2.zip
+        sha256: 106fef6dc37dd8c0e2c0a60d3fca3e77460a48907f335fa28420463a6f799736
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/4f/5a/597ef5911cb8919efe4d86206aa8b2658616d676a7088f0825ca08bd7cb8/urllib3-1.26.6.tar.gz
+        sha256: f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
+        sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/37/fd/05a04d7e14548474d30d90ad0db5d90ee2ba55cd967511a354cf88b534f1/charset-normalizer-2.0.3.tar.gz
+        sha256: c46c3ace2d744cfbdebceaa3c19ae691f53ae621b39fd7570f59d14fb7f2fd12
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/cb/38/4c4d00ddfa48abe616d7e572e02a04273603db446975ab46bbcd36552005/idna-3.2.tar.gz
+        sha256: 467fbad99067910785144ce333826c71fb0e63a425657295239737f7ecd125f3
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/c1/47/dfc9c342c9842bbe0036c7f763d2d6686bcf5eb1808ba3e170afdb282210/pyparsing-2.4.7.tar.gz
+        sha256: c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/7a/3c/b5ac9fc61e1e559ced3e40bf5b518a4142536b34eb274aa50dff29cb89f5/execnet-1.9.0.tar.gz
+        sha256: 8f694f3ba9cc92cab508b152dcfe322153975c29bda272e2fd7f3f00f36e47c5
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/c7/13/37ea7805ae3057992e96ecb1cffa2fa35c2ef4498543b846f90dd2348d8f/contextlib2-21.6.0.tar.gz
+        sha256: ab1e2bfe1d01d968e1b7e8d9023bc51ef3509bba217bb730cee3827e1ee82869
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/e2/be/3ea39a8fd4ed3f9a25aae18a1bff2df7a610bca93c8ede7475e32d8b73a0/mock-4.0.3.tar.gz
+        sha256: 7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/8a/48/a76be51647d0eb9f10e2a4511bf3ffb8cc1e6b14e9e4fab46173aa79f981/termcolor-1.1.0.tar.gz
+        sha256: 1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b
+      - type: shell
+        commands:
+          - sed -i '216i DOWNLOAD_DIR ${CMakePythonDistributions_ARCHIVE_DOWNLOAD_DIR}' CMakeLists.txt
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}/pypi" --prefix=${FLATPAK_DEST} setuptools-scm setuptools-git pytest-runner
+      - pip3 install --no-index --find-links="file://${PWD}/pypi" --prefix=${FLATPAK_DEST} -r requirements-test.txt
+      - python3 setup.py bdist_wheel -d ${FLATPAK_DEST} -- -DBUILD_CMAKE_FROM_SOURCE:BOOL=ON -DCMakePythonDistributions_ARCHIVE_DOWNLOAD_DIR:PATH=${PWD}/tarballs
+
+  - name: freetype-py
+    buildsystem: simple
+    build-options:
+      env:
+        FREETYPEPY_BUNDLE_FT: yesplease
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/e8/16/d7fee48fd6ac1234af8ae4f1d664a6c8f0748e138a6ce676c194923f2104/freetype-py-2.2.0.zip
+        sha256: cf43716bc5246cd54a64b2238b942e8dc80b79eda92f814c720286fa6fab387a
+      - type: file
+        dest: build
+        url: https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.xz
+        sha256: 1543d61025d2e6312e0a1c563652555f17378a204a61e99928c9fcef030a2d8b
+      - type: file
+        dest: build
+        url: https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-2.6.7.tar.xz
+        sha256: 49e481d06cdff97bf68d99fa26bdf785331f411614485d892ea4c78eb479b218
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/db/e2/c0ced9ccffb61432305665c22842ea120c0f649eec47ecf2a45c596707c4/setuptools-57.4.0.tar.gz
+        sha256: 6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/ed/46/e298a50dde405e1c202e316fa6a3015ff9288423661d7ea5e8f22f589071/wheel-0.36.2.tar.gz
+        sha256: e11eefd162658ea59a60a0f6c7d493a7190ea4b9a85e335b33489d9f17e0245e
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz
+        sha256: b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/6d/78/f8db8d57f520a54f0b8a438319c342c61c22759d8f9a1cd2e2180b5e5ea9/certifi-2021.5.30.tar.gz
+        sha256: 2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee
+      - type: shell
+        commands:
+          - cp ${FLATPAK_DEST}/cmake-3.21.1-cp38-cp38-linux_x86_64.whl pypi
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}/pypi" --prefix=${FLATPAK_DEST} setuptools>=42 wheel setuptools_scm[toml]>=3.4 certifi cmake
+      - python3 setup.py bdist_wheel -d ${FLATPAK_DEST}
+
+  - name: vispy
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/e1/73/7af0ff8ebe9e3c91f3d7b3f6ad4d93f4d678e51857ccee16dfd8a82c2147/vispy-0.7.3.tar.gz
+        sha256: 1edd3434247577e0910f9c76331b82a54be7e5381c022120c7336e73167b155c
+      - type: file
+        url: https://files.pythonhosted.org/packages/ed/46/e298a50dde405e1c202e316fa6a3015ff9288423661d7ea5e8f22f589071/wheel-0.36.2.tar.gz
+        sha256: e11eefd162658ea59a60a0f6c7d493a7190ea4b9a85e335b33489d9f17e0245e
+      - type: file
+        url: https://files.pythonhosted.org/packages/db/e2/c0ced9ccffb61432305665c22842ea120c0f649eec47ecf2a45c596707c4/setuptools-57.4.0.tar.gz
+        sha256: 6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465
+      - type: file
+        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+      - type: file
+        url: https://files.pythonhosted.org/packages/7e/2c/0c15b29a1b5940250bfdc4a4f53272e35cd7cf8a34159291b6b4ec9eb291/setuptools_scm_git_archive-1.1.tar.gz
+        sha256: 6026f61089b73fa1b5ee737e95314f41cb512609b393530385ed281d0b46c062
+      - type: file
+        url: https://files.pythonhosted.org/packages/59/e3/78c921adf4423fff68da327cc91b73a16c63f29752efe7beb6b88b6dd79d/Cython-0.29.24.tar.gz
+        sha256: cdf04d07c3600860e8c2ebaad4e8f52ac3feb212453c1764a49ac08c827e8443
+      - type: file
+        url: https://files.pythonhosted.org/packages/b2/f0/d5eda2077aae01cf0cf6a03371a0dc2f9189f906705a292bc901917796df/oldest-supported-numpy-0.9.tar.gz
+        sha256: 599cfdb1ebf0789793a8c06a3e4d7084314ffe3ddce84d18f122de1824e825a8
+      - type: file
+        url: https://files.pythonhosted.org/packages/b6/d6/be8f975f5322336f62371c9abeb936d592c98c047ad63035f1b38ae08efe/numpy-1.17.3.zip
+        sha256: a0678793096205a4d784bd99f32803ba8100f639cf3b932dc63b21621390ea7e
+      - type: file
+        url: https://files.pythonhosted.org/packages/90/55/399ab9f2e171047d28933ae4b686d9382d17e6c09a01bead4a6f6b5038f4/kiwisolver-1.3.1.tar.gz
+        sha256: 950a199911a8d94683a6b10321f9345d5a3a8433ec58b217ace979e18f16e248
+      - type: file
+        url: https://files.pythonhosted.org/packages/36/64/be592e84c443a70ea5dcfb1c30bfe6f10ba7d8eb05c2264c7ceca8498548/cppy-1.1.0.tar.gz
+        sha256: 4eda6f1952054a270f32dc11df7c5e24b259a09fddf7bfaa5f33df9fb4a29642
+      - type: file
+        url: https://files.pythonhosted.org/packages/91/bf/6f819c811c2f6ed71e3cd619b66571850ef8e1fc13966b760c04d852ee97/hsluv-5.0.2.tar.gz
+        sha256: ffea98b29c6a7d25a4296eed400b491c89fd89365806a0f646ede44c043727fa
+      - type: shell
+        commands:
+          - cp ${FLATPAK_DEST}/freetype_py-2.2.0-py3-none-linux_x86_64.whl .
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} setuptools_scm
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} setuptools_scm_git_archive
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} cppy
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} vispy
+
+  - name: pyopengl
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/b8/73/31c8177f3d236e9a5424f7267659c70ccea604dab0585bfcd55828397746/PyOpenGL-3.1.5.tar.gz
+        sha256: 4107ba0d0390da5766a08c242cf0cf3404c377ed293c5f6d701e457c57ba3424
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} PyOpenGL
+
+  - name: spatialindex
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.bz2
+        sha256: 31ec0a9305c3bd6b4ad60a5261cba5402366dd7d1969a8846099717778e9a50a
+
+  - name: rtree
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/ff/6f/1dcfc62cd3f0347a67b5e302250271837860ea4973c5df512dc6347fb070/Rtree-0.9.7.tar.gz
+        sha256: be8772ca34699a9ad3fb4cfe2cfb6629854e453c10b3328039301bbfc128ca3e
+      - type: file
+        url: https://files.pythonhosted.org/packages/ed/46/e298a50dde405e1c202e316fa6a3015ff9288423661d7ea5e8f22f589071/wheel-0.36.2.tar.gz
+        sha256: e11eefd162658ea59a60a0f6c7d493a7190ea4b9a85e335b33489d9f17e0245e
+      - type: file
+        url: https://files.pythonhosted.org/packages/db/e2/c0ced9ccffb61432305665c22842ea120c0f649eec47ecf2a45c596707c4/setuptools-57.4.0.tar.gz
+        sha256: 6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} Rtree
+
+  - name: matplotlib
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://files.pythonhosted.org/packages/60/d3/286925802edaeb0b8834425ad97c9564ff679eb4208a184533969aa5fc29/matplotlib-3.4.2.tar.gz
+        sha256: d8d994cefdff9aaba45166eb3de4f5211adb4accac85cbf97137e98f26ea0219
+      - type: archive
+        dest: build/freetype-2.6.1
+        url: https://download.savannah.gnu.org/releases/freetype/freetype-2.6.1.tar.gz
+        sha256: 0a3c7dfbda6da1e8fce29232e8e96d987ababbbf71ebc8c75659e4132c367014
+      - type: archive
+        dest: build/qhull-2020.2
+        url: http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz
+        sha256: b5c2d7eb833278881b952c8a52d20179eab87766b00b865000469a45c1838b7e
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/c2/4b/137dea450d6e1e3d474e1d873cd1d4f7d3beed7e0dc973b06e8e10d32488/cycler-0.10.0.tar.gz
+        sha256: cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz
+        sha256: 0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/db/e2/c0ced9ccffb61432305665c22842ea120c0f649eec47ecf2a45c596707c4/setuptools-57.4.0.tar.gz
+        sha256: 6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/ed/46/e298a50dde405e1c202e316fa6a3015ff9288423661d7ea5e8f22f589071/wheel-0.36.2.tar.gz
+        sha256: e11eefd162658ea59a60a0f6c7d493a7190ea4b9a85e335b33489d9f17e0245e
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/57/38/930b1241372a9f266a7df2b184fb9d4f497c2cef2e016b014f82f541fe7c/setuptools_scm-6.0.1.tar.gz
+        sha256: d1925a69cb07e9b29416a275b9fadb009a23c148ace905b2fb220649a6c18e92
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}/pypi" --prefix=${FLATPAK_DEST} cycler python-dateutil
+      - python3 setup.py bdist_wheel -d ${PWD}/pypi
+      - pip3 install --no-index --find-links="file://${PWD}/pypi" --prefix=${FLATPAK_DEST} matplotlib
+
+  - name: gdal
+    config-opts:
+      - --with-python=python3
+      - --with-libtiff=internal
+      - --with-netcdf
+      - --with-sqlite3
+      - --with-geotiff=internal
+      - --with-mysql
+      - --with-curl
+      - --with-hdf5
+      - --with-geos
+      - --with-png
+      - --with-poppler
+      - --with-spatialite=/app
+      - --with-openjpeg
+      - --with-hide-internal-symbols
+      - --with-bsb
+      - --with-grib
+      - --with-pam
+      - --with-pcre
+      - --with-threads=yes
+      - --with-liblzma=yes
+      - --with-pcidsk=internal
+      - --with-pcraster=internal
+      - --with-qhull=internal
+      - --with-cryptopp
+      - --with-crypto
+      - --with-cfitsio
+      - --with-xerces=/app
+      - --with-odbc
+      - --with-proj
+      - --with-rename-internal-libtiff-symbols
+      - --with-rename-internal-libgeotiff-symbols
+      - --with-jpeg12
+      - --with-armadillo
+      - --with-libkml=/app
+    sources:
+      - type: archive
+        url: http://download.osgeo.org/gdal/3.2.1/gdal-3.2.1.tar.xz
+        sha256: 6c588b58fcb63ff3f288eb9f02d76791c0955ba9210d98c3abd879c770ae28ea
+    modules:
+      - name: swig
+        config-opts:
+          - --without-boost
+          - --without-pcre
+          - --without-alllang
+          - --with-python3
+        cleanup:
+          - /bin
+          - /share/swig
+        sources:
+          - type: archive
+            url: http://prdownloads.sourceforge.net/swig/swig-3.0.12.tar.gz
+            sha256: 7cf9f447ae7ed1c51722efc45e7f14418d15d7a1e143ac9f09a668999f4fc94d
+      - name: xerces-c
+        no-autogen: true
+        sources:
+          - type: archive
+            url: https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-3.2.2.tar.gz
+            sha256: dd6191f8aa256d3b4686b64b0544eea2b450d98b4254996ffdfe630e0c610413
+      - name: szip
+        no-autogen: true
+        sources:
+          - type: archive
+            url: https://support.hdfgroup.org/ftp/lib-external/szip/2.1.1/src/szip-2.1.1.tar.gz
+            sha256: 21ee958b4f2d4be2c9cabfa5e1a94877043609ce86fde5f286f105f7ff84d412
+      - name: hdf5
+        no-autogen: true
+        sources:
+          - type: archive
+            url: https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.bz2
+            sha256: 97906268640a6e9ce0cde703d5a71c9ac3092eded729591279bf2e3ca9765f61
+      - name: uriparser
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DURIPARSER_BUILD_TESTS=OFF
+          - -DURIPARSER_BUILD_DOCS=OFF
+        builddir: true
+        sources:
+          - type: archive
+            url: https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.5/uriparser-0.9.5.tar.bz2
+            sha256: dd8061eba7f2e66c151722e6db0b27c972baa6215cf16f135dbe0f0a4bc6606c
+      - name: cfitsio
+        buildsystem: simple
+        build-commands:
+          - ./configure --prefix=${FLATPAK_DEST} --enable-reentrant
+          - make shared
+          - make install
+        sources:
+          - type: archive
+            url: https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.48.tar.gz
+            sha256: 91b48ffef544eb8ea3908543052331072c99bf09ceb139cb3c6977fc3e47aac1
+      - name: armadillo
+        buildsystem: cmake-ninja
+        config-opts:
+         - -DDETECT_HDF5=ON
+         - -DCMAKE_INSTALL_LIBDIR=lib
+        builddir: true
+        sources:
+          - type: archive
+            url: https://sourceforge.net/projects/arma/files/armadillo-10.2.0.tar.xz
+            sha256: 82f84d526c8da72240ab05cb12b3f3f1e674d20ccb38e008e4bf53355b1aa68a
+      - name: cryptopp
+        buildsystem: simple
+        build-commands:
+          - make shared all
+          - make install PREFIX=${FLATPAK_DEST}
+        sources:
+          - type: archive
+            url: https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_5_0.tar.gz
+            sha256: 8f64cf09cf4f61d5d74bca53574b8cc9959186cc0f072a2e6597e4999d6ad5db
+      - name: boost
+        buildsystem: simple
+        build-commands:
+          - ./bootstrap.sh --prefix=${FLATPAK_DEST}
+          - ./b2 -j ${FLATPAK_BUILDER_N_JOBS} headers
+          - cp -r boost ${FLATPAK_DEST}/include/boost
+        sources:
+          - type: archive
+            url: https://downloads.sourceforge.net/project/boost/boost/1.73.0/boost_1_73_0.tar.bz2
+            sha256: 4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402
+      - name: libkml
+        buildsystem: cmake-ninja
+        builddir: true
+        modules:
+          - name: minizip
+            subdir: contrib/minizip
+            sources:
+              - type: archive
+                url: https://zlib.net/zlib-1.2.11.tar.gz
+                sha256: c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
+                x-checker-data:
+                  type: anitya
+                  project-id: 5303
+                  url-template: https://zlib.net/zlib-$version.tar.gz
+              - type: script
+                dest-filename: contrib/minizip/autogen.sh
+                commands:
+                  - autoreconf -ifv
+        sources:
+          - type: archive
+            url: https://github.com/libkml/libkml/archive/1.3.0.tar.gz
+            sha256: 8892439e5570091965aaffe30b08631fdf7ca7f81f6495b4648f0950d7ea7963
+      - name: netcdf
+        no-autogen: true
+        sources:
+          - type: archive
+            url: https://github.com/Unidata/netcdf-c/archive/v4.7.4.tar.gz
+            sha256: 99930ad7b3c4c1a8e8831fb061cb02b2170fc8e5ccaeda733bd99c3b9d31666b
+      - name: openjpeg2
+        buildsystem: cmake-ninja
+        builddir: true
+        sources:
+          - type: git
+            url: https://github.com/uclouvain/openjpeg.git
+            branch: v2.4.0
+        cleanup:
+          - /bin
+          - /include
+          - /lib/openjpeg-*
+          - /lib/pkgconfig
+      - name: poppler
+        modules:
+          - name: popplerdata
+            buildsystem: cmake-ninja
+            builddir: true
+            sources:
+              - type: archive
+                url: https://poppler.freedesktop.org/poppler-data-0.4.9.tar.gz
+                sha256: 1f9c7e7de9ecd0db6ab287349e31bf815ca108a5a175cf906a90163bdbe32012
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DENABLE_TESTING=OFF
+          - -DENABLE_UNSTABLE_API_ABI_HEADERS=ON
+          - -DENABLE_CPP=ON
+          - -DENABLE_GLIB=OFF
+          - -DENABLE_GOBJECT_INTROSPECTION=OFF
+          - -DENABLE_UTILS=OFF
+          - -DENABLE_LIBOPENJPEG=openjpeg2
+        cleanup:
+          - /bin
+          - /share
+        buildsystem: cmake-ninja
+        builddir: true
+        sources:
+          - type: archive
+            url: https://poppler.freedesktop.org/poppler-0.86.0.tar.xz
+            sha256: 6ae8a0b9fde8718025e0034448329efe5fd38194a32ac38f84a1528203c1f9bc
+      - name: mysql-boost
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DFORCE_INSOURCE_BUILD=1
+          - -DWITH_EDITLINE=bundled
+          - -DWITH_SSL=yes
+          - -DWITH_UNIT_TESTS=OFF
+          - -DWITHOUT_SERVER=ON
+        buildsystem: cmake-ninja
+        builddir: true
+        sources:
+          - type: archive
+            url: https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-boost-8.0.25.tar.gz
+            sha256: 93c5f57cbd69573a8d9798725edec52e92830f70c398a1afaaea2227db331728
+      - name: libjpeg-turbo
+        config-opts:
+          - -DWITH_JPEG8=1
+        cleanup:
+          - /bin
+          - /share
+        buildsystem: cmake-ninja
+        builddir: true
+        sources:
+          - type: archive
+            url: https://downloads.sourceforge.net/project/libjpeg-turbo/2.0.4/libjpeg-turbo-2.0.4.tar.gz
+            sha256: 33dd8547efd5543639e890efbf2ef52d5a21df81faf41bb940657af916a23406
+      - name: proj
+        sources:
+          - type: git
+            url: https://github.com/OSGeo/PROJ.git
+            branch: 6.3.2
+
+  - name: rasterio
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/d6/61/f083df6539a3ad5ddb480dd5551d55039b9f59948c68415a9737ea62081a/rasterio-1.2.6.tar.gz
+        sha256: 24975b97fe2fc3fd282d59640baab19de431448e1b23be6b85b68fecc1362f88
+      - type: file
+        url: https://files.pythonhosted.org/packages/db/e2/c0ced9ccffb61432305665c22842ea120c0f649eec47ecf2a45c596707c4/setuptools-57.4.0.tar.gz
+        sha256: 6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465
+      - type: file
+        url: https://files.pythonhosted.org/packages/ed/46/e298a50dde405e1c202e316fa6a3015ff9288423661d7ea5e8f22f589071/wheel-0.36.2.tar.gz
+        sha256: e11eefd162658ea59a60a0f6c7d493a7190ea4b9a85e335b33489d9f17e0245e
+      - type: file
+        url: https://files.pythonhosted.org/packages/6c/9f/f501ba9d178aeb1f5bf7da1ad5619b207c90ac235d9859961c11829d0160/Cython-0.29.21.tar.gz
+        sha256: e57acb89bd55943c8d8bf813763d20b9099cc7165c0f16b707631a7654be9cad
+      - type: file
+        url: https://files.pythonhosted.org/packages/b2/f0/d5eda2077aae01cf0cf6a03371a0dc2f9189f906705a292bc901917796df/oldest-supported-numpy-0.9.tar.gz
+        sha256: 599cfdb1ebf0789793a8c06a3e4d7084314ffe3ddce84d18f122de1824e825a8
+      - type: file
+        url: https://files.pythonhosted.org/packages/b6/d6/be8f975f5322336f62371c9abeb936d592c98c047ad63035f1b38ae08efe/numpy-1.17.3.zip
+        sha256: a0678793096205a4d784bd99f32803ba8100f639cf3b932dc63b21621390ea7e
+      - type: file
+        url: https://files.pythonhosted.org/packages/21/83/308a74ca1104fe1e3197d31693a7a2db67c2d4e668f20f43a2fca491f9f7/click-8.0.1.tar.gz
+        sha256: 8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a
+      - type: file
+        url: https://files.pythonhosted.org/packages/5f/1d/45434f64ed749540af821fd7e42b8e4d23ac04b1eda7c26613288d6cd8a8/click-plugins-1.1.1.tar.gz
+        sha256: 46ab999744a9d831159c3411bb0c79346d94a444df9a3a3742e9ed63645f264b
+      - type: file
+        url: https://files.pythonhosted.org/packages/93/19/0d11ab370735dde61076a0e41644e5593821776e69e3b0344626cfa0e56a/snuggs-1.4.7.tar.gz
+        sha256: 501cf113fe3892e14e2fee76da5cd0606b7e149c411c271898e6259ebde2617b
+      - type: file
+        url: https://files.pythonhosted.org/packages/ea/0d/837dbd5d8430fd0f01ed72c4cfb2f548180f4c68c635df84ce87956cff32/cligj-0.7.2.tar.gz
+        sha256: a4bc13d623356b373c2c27c53dbd9c68cae5d526270bfa71f6c6fa69669c6b27
+      - type: file
+        url: https://files.pythonhosted.org/packages/93/73/2467d77542b3125a2ebb9c1fccf19bc8621847178619984fabc24810a389/affine-2.3.0.tar.gz
+        sha256: 2e045def1aa29e613c42e801a7e10e0b9bacfed1a7c6af0cadf8843530a15102
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} rasterio
+
+  - name: ezdxf
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/31/2f/fe93ce1671efc5fbf502d989e1dbae8ee6cfaf3186af4ee1d325ca7b3ac2/ezdxf-0.14.2.zip
+        sha256: acb4dbd980dce755304cbf83693a60b5f6cec8de1a45ce3d14662077ffbcc431
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} ezdxf
+
+  - name: svg.path
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/2e/62/b13cfccfe2de368169d1f0a13ec205a670122fa75e6be9de66cebaff690c/svg.path-4.1.tar.gz
+        sha256: 7e6847ba690ff620e20f152818d52e1685b993aacbc41b321f8fee3d1cb427db
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} svg.path
+
+  - name: fonttools
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/47/7c/dd9dc174842a9bc6fdae89045e820acd8a53a2251b4a8e6d22c97e1c7d75/fonttools-4.25.2.zip
+        sha256: 507f8e027967fe4ebfa913856b3acc6b77201e67d6a6978d3666863cbba884c3
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} fonttools
+
+  - name: ortools
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_PYTHON=ON
+      - -DBUILD_DEPS=OFF
+      - -DBUILD_TESTING=OFF
+      - -DCMAKE_CXX_STANDARD=17
+    modules:
+      - name: absl
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DBUILD_SHARED_LIBS=ON
+          - -DCMAKE_CXX_STANDARD=17
+          - -DCMAKE_INSTALL_LIBDIR=lib
+        sources:
+          - type: archive
+            url: https://github.com/abseil/abseil-cpp/archive/refs/tags/20210324.2.tar.gz
+            sha256: 59b862f50e710277f8ede96f083a5bb8d7c9595376146838b9580be90374ee1f
+      - name: protobuf
+        cleanup:
+          - "/bin"
+          - "/lib/libprotoc*"
+          - "/lib/libprotobuf-lite*"
+          - "/share/emacs"
+          - "/share/vim"
+        sources:
+          - type: git
+            url: https://github.com/protocolbuffers/protobuf.git
+            tag: v3.15.8
+            commit: 436bd7880e458532901c58f4d9d1ea23fa7edd52
+      - name: scip
+        buildsystem: cmake-ninja
+        modules:
+          - name: papilo
+            buildsystem: cmake-ninja
+            modules:
+              - name: tbb
+                buildsystem: cmake-ninja
+                sources:
+                  - type: git
+                    url: https://github.com/wjakob/tbb
+                    branch: master
+            sources:
+              - type: git
+                url: https://github.com/scipopt/papilo.git
+                branch: develop
+          - name: soplex
+            buildsystem: cmake-ninja
+            sources:
+              - type: git
+                url: https://github.com/scipopt/soplex.git
+                branch: master
+          - name: zimpl
+            buildsystem: cmake-ninja
+            sources:
+              - type: archive
+                url: https://zimpl.zib.de/download/zimpl-3.3.6.tgz
+                sha256: 1f3f0bc2b9710a87b04985d9f14cc1bc207add8b2e16a8b373cb540b8fbe1326
+          - name: ipopt
+            modules:
+              - name: lapack
+                buildsystem: cmake-ninja
+                builddir: true
+                config-opts:
+                  - -DCMAKE_BUILD_TYPE=Release
+                  - -DBUILD_SHARED_LIBS=ON
+                  - -DBUILD_TESTING=OFF
+                  - -DCMAKE_Fortran_COMPILER=gfortran
+                  - -DLAPACKE=ON
+                  - -DCBLAS=ON
+                  - -DCMAKE_INSTALL_LIBDIR=lib
+                sources:
+                  - type: archive
+                    url: https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.10.0.tar.gz
+                    sha256: 328c1bea493a32cac5257d84157dc686cc3ab0b004e2bea22044e0a59f6f8a19
+            sources:
+              - type: archive
+                url: https://github.com/coin-or/Ipopt/archive/refs/tags/releases/3.14.2.tar.gz
+                sha256: 3ec6776b9a1ed8895f662bfc9939b067722770297be78ca4d6dc1cb42557da62
+        sources:
+          - type: git
+            url: https://github.com/scipopt/scip.git
+            branch: master
+      - name: coinutils
+        sources:
+          - type: archive
+            url: https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.4.tar.gz
+            sha256: d4effff4452e73356eed9f889efd9c44fe9cd68bd37b608a5ebb2c58bd45ef81
+      - name: osi
+        sources:
+          - type: archive
+            url: https://github.com/coin-or/Osi/archive/refs/tags/releases/0.108.6.tar.gz
+            sha256: 984a5886825e2da9bf44d8a665f4b92812f0700e451c12baf9883eaa2315fad5
+      - name: clp
+        sources:
+          - type: archive
+            url: https://github.com/coin-or/Clp/archive/refs/tags/releases/1.17.6.tar.gz
+            sha256: afff465b1620cfcbb7b7c17b5d331d412039650ff471c4160c7eb24ae01284c9
+      - name: cgl
+        sources:
+          - type: archive
+            url: https://github.com/coin-or/Cgl/archive/refs/tags/releases/0.60.3.tar.gz
+            sha256: cfeeedd68feab7c0ce377eb9c7b61715120478f12c4dd0064b05ad640e20f3fb
+      - name: cbc
+        sources:
+          - type: archive
+            url: https://github.com/coin-or/Cbc/archive/refs/tags/releases/2.10.5.tar.gz
+            sha256: cc44c1950ff4615e7791d7e03ea34318ca001d3cac6dc3f7f5ee392459ce6719
+    sources:
+      - type: archive
+        url: https://github.com/google/or-tools/archive/refs/tags/v9.0.tar.gz
+        sha256: fa7700b614ea2a5b2b6e37b76874bd2c3f04a80f03cbbf7871a2d2d5cd3a6091
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/bd/6d/12d492e684076c75ec3b120fc7bdc9ba91e72ff365c90fb2d44a2d35e507/mypy-protobuf-2.9.tar.gz
+        sha256: 278172935d7121c2f8c7c0a05518dd565a2b76d9e9c4a0a3fcd08a21fa685d43
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/3d/64/a3b379cb9c7827ad33c67dcda4c4ad117bdef1b7d68b22a05c963cf4727d/protobuf-3.17.3.tar.gz
+        sha256: 72804ea5eaa9c22a090d2803813e280fb273b62d5ae497aaf3553d141c4fdd7b
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/52/4d/d792e9d2a0a31841c45d55585538ba895ab33bfa42c6465a4f2377dbbce3/types-protobuf-3.17.4.tar.gz
+        sha256: 36cfec22f0096c9be2d9e44ad33480eb91969ffa72a51fa55842597cf59f8264
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/11/de/449bdcfa04227617631dda9de4c2d668bf5854e439aa41f04a8cdd7aab5f/grpcio-tools-1.39.0.tar.gz
+        sha256: 39dfe7415bc0d3860fdb8dd90607594b046b88b57dbe64284efa4820f951c805
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/07/ea/398472e896f529d23fb58e33f01298dfc554a341d58f87c1ea5ad817208e/grpcio-1.39.0.tar.gz
+        sha256: 57974361a459d6fe04c9ae0af1845974606612249f467bbd2062d963cb90f407
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/bd/19/f745c456b2b1a4b200e4c2d842c3c752b532966be3608cac23c8c4af7e2f/types-futures-0.1.6.tar.gz
+        sha256: da372dd55dc08c257de1e3dfd56273e44af9668e077047b0509adcfc43dd2838
+      - type: file
+        dest: pypi
+        url: https://files.pythonhosted.org/packages/75/c6/ea1b86d2e7068e77f5204f8280edb2434596c1bad59fe03564f3d11d5caf/absl-py-0.13.0.tar.gz
+        sha256: 6953272383486044699fd0e9f00aad167a27e08ce19aae66c6c4b10e7e767793
+      - type: shell
+        commands:
+          - pip3 install --no-index --find-links="file://${PWD}/pypi" --prefix=${FLATPAK_DEST} mypy-protobuf absl-py
+      - type: shell
+        commands:
+          - sed -i '11i \ \ LINKER_LANGUAGE Cxx' ortools/init/CMakeLists.txt
+
+  - name: pyserial
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/1e/7d/ae3f0a63f41e4d2f6cb66a5b57197850f919f59e558159a4dd3a818f5082/pyserial-3.5.tar.gz
+        sha256: 3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} pyserial
+
+  - name: tkinter
+    buildsystem: simple
+    modules:
+      - name: tcl
+        sources:
+          - type: archive
+            url: https://sourceforge.net/projects/tcl/files/Tcl/8.6.11/tcl8.6.11-src.tar.gz
+            sha256: 8c0486668586672c5693d7d95817cb05a18c5ecca2f40e2836b9578064088258
+        subdir: unix
+        post-install:
+          - chmod +w /app/lib/libtcl8.6.so
+      - name: tk
+        sources:
+          - type: archive
+            url: https://sourceforge.net/projects/tcl/files/Tcl/8.6.11/tk8.6.11-src.tar.gz
+            sha256: 5228a8187a7f70fa0791ef0f975270f068ba9557f57456f51eb02d9d4ea31282
+        subdir: unix
+        post-install:
+          - chmod +w /app/lib/libtk8.6.so
+    sources:
+      - type: git
+        url: https://github.com/iwalton3/tkinter-standalone
+        commit: 2301112d142ebaf7532b25600c77d1a2edc9ef04
+    build-commands:
+      - pip3 install --prefix=${FLATPAK_DEST} .
+
+  - name: qrcode
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/99/6f/3914ab406164775a6293ebe001e57d23e38c09d51f3909c45bd132684927/qrcode-7.2.tar.gz
+        sha256: 153ad96f5892e6fe2f3699296240976ac3a6d068e2eb48bbfc64b4c4c4d675ea
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} qrcode
+
+  - name: dill
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/57/b7/c4aa04a27040e6a3b09f5a652976ead00b66504c014425a7aad887aa8d7f/dill-0.3.4.zip
+        sha256: 9f9734205146b2b353ab3fec9af0070237b6ddae78452af83d2fca84d739e675
+    build-commands:
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} dill
+
+  - name: flatcam
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://bitbucket.org/jpcgt/flatcam/downloads/FlatCAM_beta_8.994_sources.zip
+        sha256: 0dc3f609ec3f03fe98b9a1d218cad6ca861940f7ad2648e5fa5529b925bae332
+      - type: shell
+        commands:
+          - sed -i 's|/usr/local/bin|'${FLATPAK_DEST}'|g' Makefile
+    build-commands:
+      - make install USER_ID=0 INSTALL_PATH=${FLATPAK_DEST}/flatcam APPS_PATH=${FLATPAK_DEST}/flatcam
+    post-install:
+      - chmod +x ${FLATPAK_DEST}/flatcam-beta
