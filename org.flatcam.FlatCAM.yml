@@ -2,7 +2,7 @@ app-id: org.flatcam.FlatCAM
 runtime: org.kde.Platform
 runtime-version: '5.15'
 sdk: org.kde.Sdk
-command: /app/flatcam-beta
+command: flatcam-beta
 finish-args:
   - --env=LD_PRELOAD=/app/lib/libgdal.so
   - --socket=wayland
@@ -1010,8 +1010,8 @@ modules:
         sha256: 0dc3f609ec3f03fe98b9a1d218cad6ca861940f7ad2648e5fa5529b925bae332
       - type: shell
         commands:
-          - sed -i 's|/usr/local/bin|'${FLATPAK_DEST}'|g' Makefile
+          - sed -i 's|/usr/local/bin|'${FLATPAK_DEST}/bin'|g' Makefile
     build-commands:
       - make install USER_ID=0 INSTALL_PATH=${FLATPAK_DEST}/flatcam APPS_PATH=${FLATPAK_DEST}/flatcam
     post-install:
-      - chmod +x ${FLATPAK_DEST}/flatcam-beta
+      - chmod +x ${FLATPAK_DEST}/bin/flatcam-beta
