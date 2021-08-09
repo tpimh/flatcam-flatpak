@@ -6,6 +6,8 @@ command: flatcam-beta
 finish-args:
   - --env=LD_PRELOAD=/app/lib/libgdal.so
   - --socket=wayland
+  - --socket=x11
+  - --device=all
 modules:
   - name: pyqt5
     config-opts:
