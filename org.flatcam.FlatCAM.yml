@@ -654,7 +654,7 @@ modules:
                   project-id: 5303
                   url-template: https://zlib.net/zlib-$version.tar.gz
               - type: script
-                dest-filename: contrib/minizip/autogen.sh
+                dest: contrib/minizip/
                 commands:
                   - autoreconf -ifv
         sources:
