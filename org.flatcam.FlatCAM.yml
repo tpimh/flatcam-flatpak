@@ -887,7 +887,7 @@ modules:
         sources:
           - type: git
             url: https://github.com/scipopt/scip.git
-            branch: master
+            branch: v70-bugfix
       - name: coinutils
         sources:
           - type: archive
