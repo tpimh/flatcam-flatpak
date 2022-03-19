@@ -487,7 +487,7 @@ modules:
         sha256: d8d994cefdff9aaba45166eb3de4f5211adb4accac85cbf97137e98f26ea0219
       - type: archive
         dest: build/freetype-2.6.1
-        url: https://download.savannah.gnu.org/releases/freetype/freetype-2.6.1.tar.gz
+        url: https://download.savannah.gnu.org/releases/freetype/freetype-old/freetype-2.6.1.tar.gz
         sha256: 0a3c7dfbda6da1e8fce29232e8e96d987ababbbf71ebc8c75659e4132c367014
       - type: archive
         dest: build/qhull-2020.2
