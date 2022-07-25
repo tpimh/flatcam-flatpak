@@ -878,7 +878,7 @@ modules:
             sources:
               - type: git
                 url: https://github.com/scipopt/papilo.git
-                branch: develop
+                tag: v2.0.0
           - name: soplex
             buildsystem: cmake-ninja
             sources:
