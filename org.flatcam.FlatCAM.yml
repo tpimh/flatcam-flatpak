@@ -10,6 +10,20 @@ finish-args:
   - --device=all
   - --filesystem=home
 modules:
+  - name: flatcam-metadata
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 org.flatcam.FlatCAM.desktop /app/share/applications/org.flatcam.FlatCAM.desktop
+      - install -Dm664 org.flatcam.FlatCAM.png /app/share/icons/hicolor/256x256/apps/org.flatcam.FlatCAM.png
+      - install -Dm664 org.flatcam.FlatCAM.metainfo.xml /app/share/metainfo/org.flatcam.FlatCAM.metainfo.xml
+    sources:
+      - type: file
+        path: org.flatcam.FlatCAM.desktop
+      - type: file
+        path: org.flatcam.FlatCAM.png
+      - type: file
+        path: org.flatcam.FlatCAM.metainfo.xml
+
   - name: pyqt5
     config-opts:
       - --assume-shared

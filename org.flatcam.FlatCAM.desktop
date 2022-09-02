@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=flatcam-beta
+Name=FlatCAM Beta
+Icon=org.flatcam.FlatCAM
+Categories=Development;Education;Science;
+X-Flatpak=org.flatcam.FlatCAM
