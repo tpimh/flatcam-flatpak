@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<component type="desktop">
+  <id>org.flatcam.FlatCAM</id>
+  <provides><id>org.flatcam.FlatCAM.desktop</id></provides>
+  <launchable type="desktop-id">org.flatcam.FlatCAM.desktop</launchable>
+  <name>FlatCAM Beta</name>
+  <developer_name>Juan Pablo Caram</developer_name>
+  <summary>FlatCAM lets you take your designs to a CNC router</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>LicenseRef-proprietary=http://flatcam.org/disclaimer</project_license>
+  <url type="homepage">http://flatcam.org</url>
+  <url type="help">http://flatcam.org/discussion</url>
+  <description>
+    <p>FlatCAM lets you take your designs to a CNC router. You can open Gerber, Excellon or G-code, edit it or create from scatch, and output G-Code. Isolation routing is one of many tasks that FlatCAM is perfect for. It's is open source, written in Python and runs smoothly on most platforms.</p>
+  </description>
+  <releases>
+    <release version="8.994" date="2020-11-07"/>
+  </releases>
+</component>
